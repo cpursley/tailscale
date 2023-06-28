@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:buster
 WORKDIR /render
 
 ARG TAILSCALE_VERSION
@@ -8,7 +8,7 @@ RUN apt-get -qq update \
   && apt-get -qq install --upgrade -y --no-install-recommends \
     apt-transport-https \
     ca-certificates \
-    netcat \
+    netcat-traditional \
     wget \
     dnsutils \
   > /dev/null \
@@ -17,12 +17,15 @@ RUN apt-get -qq update \
     /var/lib/apt/lists/* \
     /tmp/* \
     /var/tmp/* \
-  && :
+  && true
 
 RUN echo "+search +short" > /root/.digrc
+
 COPY run-tailscale.sh /render/
+RUN chmod +x /render/run-tailscale.sh
 
-COPY install-tailscale.sh /tmp
-RUN /tmp/install-tailscale.sh && rm -r /tmp/*
+COPY install-tailscale.sh /render/
+RUN chmod +x /render/install-tailscale.sh
+RUN /render/install-tailscale.sh && rm /render/install-tailscale.sh
 
-CMD ./run-tailscale.sh
+CMD ["./run-tailscale.sh"]
